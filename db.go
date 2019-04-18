@@ -13,7 +13,7 @@ func NewDBConn() *sql.DB {
 	return db
 }
 
-var SQLSysTable = `USE CobranzasAux; SELECT
+var SQLSysTable = `SELECT
 		s.Name AS SchemaName,
 		t.NAME AS TableName,
 		p.rows AS RowCounts,
