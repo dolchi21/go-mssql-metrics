@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -32,9 +33,11 @@ func must(err error) {
 }
 
 func loadConfig() {
-	viper.SetDefault("server.listen", ":8081")
+	configFilename := flag.String("config", "config.yml", "Specify a custom config.yml")
+	flag.Parse()
 
-	viper.SetConfigFile("config.yml")
+	viper.SetDefault("server.listen", ":8081")
+	viper.SetConfigFile(*configFilename)
 	err := viper.ReadInConfig()
 	if nil != err {
 		panic(fmt.Errorf("fatal error config file: %s", err))
