@@ -1,0 +1,5 @@
+db:
+  url: "sqlserver://username:password@hostname:port?App Name=go-mssql-metrics&database=MyDatabase"
+
+server:
+  listen: :9101
