@@ -36,7 +36,7 @@ func loadConfig() {
 	configFilename := flag.String("config", "config.yml", "Specify a custom config.yml")
 	flag.Parse()
 
-	viper.SetDefault("server.listen", ":8081")
+	viper.SetDefault("server.listen", ":9101")
 	viper.SetConfigFile(*configFilename)
 	err := viper.ReadInConfig()
 	if nil != err {
