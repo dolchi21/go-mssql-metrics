@@ -7,6 +7,7 @@ import (
 type Collectors struct {
 	TableCount      *prometheus.GaugeVec
 	TableTotalSpace *prometheus.GaugeVec
+	TableUsedSpace  *prometheus.GaugeVec
 }
 
 func (m *Collectors) Register(reg *prometheus.Registry) {
@@ -23,6 +24,7 @@ func (m *Collectors) Register(reg *prometheus.Registry) {
 func (m *Collectors) Update() {
 	updateTableCount(m.TableCount)
 	updateTableTotalSize(m.TableTotalSpace)
+	updateTableUsedSize(m.TableUsedSpace)
 }
 
 func NewMetrics() *Collectors {
@@ -34,6 +36,10 @@ func NewMetrics() *Collectors {
 		TableTotalSpace: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Name: "mssql_table_total_space",
 			Help: "Total KB reserved for table",
+		}, []string{"table", "schema"}),
+		TableUsedSpace: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Name: "mssql_table_used_space",
+			Help: "Used KB by table",
 		}, []string{"table", "schema"}),
 	}
 	return &m
@@ -56,7 +62,20 @@ func updateTableCount(g *prometheus.GaugeVec) {
 func updateTableTotalSize(g *prometheus.GaugeVec) {
 	db := NewDBConn()
 	defer db.Close()
-	rows, err := db.Query(SQLSysTableBytes)
+	rows, err := db.Query(SQLSysTableTotalSpaceBytes)
+	must(err)
+	for rows.Next() {
+		var schema, tableName string
+		var value float64
+		must(rows.Scan(&schema, &tableName, &value))
+		g.WithLabelValues(tableName, schema).Set(value)
+	}
+}
+
+func updateTableUsedSize(g *prometheus.GaugeVec) {
+	db := NewDBConn()
+	defer db.Close()
+	rows, err := db.Query(SQLSysTableUsedSpaceBytes)
 	must(err)
 	for rows.Next() {
 		var schema, tableName string
